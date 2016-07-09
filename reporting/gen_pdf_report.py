@@ -6,8 +6,7 @@
 
 import argparse
 import base64
-import datetime
-import dateutil.parser
+import time
 import os
 import re
 import subprocess
@@ -53,10 +52,6 @@ for node in xmlout.findall('.//task/name'):
   ovtaskname = ovtaskname.replace(' ', '_')
   ovtaskname = ovtaskname.replace('/', '-')
   ovtaskname = ovtaskname.replace('\\', '-')
-for node in xmlout.findall('.//task/last_report/report/timestamp'):
-  dt = dateutil.parser.parse(node.text)
-  ovreporttime = "%d%02d%02d_%02d:%02d:%02d" % (dt.year, dt.month, dt.day, dt.hour, dt.minute, dt.second)
-  
 
 # Now, get our report
 xmlcmd = "omp -u %s -w %s -iX '<get_reports report_id=\"%s\" format_id=\"%s\" levels=\"hml\"/>'" % (OV_USER, OV_PASS, ovreportid, ovformat)
@@ -65,6 +60,7 @@ xmlout = ET.fromstring(output)
 for node in xmlout.findall('.//report'):
   ovreport = node.text
 
+ovreporttime = time.strftime("%Y%m%d", time.gmtime())
 target = open("%s-%s.pdf" % (ovreporttime, ovtaskname), 'w')
 target.write(base64.b64decode(ovreport))
 target.close()
